@@ -9,7 +9,7 @@
 const int32_t latency = 16;
 const int out = 2; /* FIXME */
 const int program = 0; /* piano; FIXME */
-const int diff = 1000;
+const int diff = 500;
 
 int main(int argc, char** argv) {
 	PmStream* midi;
@@ -52,6 +52,7 @@ int main(int argc, char** argv) {
     buffer[0].message = Pm_Message(0xC0, program, 0);
     Pm_Write(midi, buffer, 1);
 
+#if 0
     /* note-on */
     buffer[0].timestamp = Pt_Time();
     buffer[0].message = Pm_Message(0x90, 60, 100);
@@ -69,6 +70,7 @@ int main(int argc, char** argv) {
     /* short note-off */
     Pm_WriteShort(midi, Pt_Time(),
                   Pm_Message(0x90, 60, 0));
+#endif
 
     /* output several note on/offs to test timing. 
        Should be 1s between notes */
@@ -83,18 +85,18 @@ int main(int argc, char** argv) {
     Pm_Write(midi, buffer, chord_size);
 
     off_time = timestamp + diff + chord_size * diff; 
-	printf("busywaiting until %d\n", off_time);
-    while (Pt_Time() < off_time) 
-		/* busy wait */; /* ewwwww */
+//	printf("busywaiting until %d\n", off_time);
+//    while (Pt_Time() < off_time) 
+//		/* busy wait */; /* ewwwww */
 
     for (int i = 0; i < chord_size; i++) {
 		printf("note %d will stop at %d\n", chord[i], off_time + diff * i);
-        buffer[i].timestamp = timestamp + diff * i;
-        buffer[i].message = Pm_Message(0x90, chord[i], 0);
+        buffer[i].timestamp = off_time + diff * i;
+        buffer[i].message = Pm_Message(0x80, chord[i], 100);
     }
-    Pm_Write(midi, buffer, chord_size);    
+   Pm_Write(midi, buffer, chord_size);    
 	printf("time is %d\n", Pt_Time());
-	sleep(5);
+	sleep(6);
 	printf("time is %d\n", Pt_Time());
 
     /* exterminate */
