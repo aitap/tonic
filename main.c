@@ -7,9 +7,14 @@
 #include <iup.h>
 
 const int32_t latency = 16; /* I need timestamps, and 16ms seems reasonable */
-const int out = 2; /* FIXME */
 const int program = 0; /* piano; FIXME */
-const int diff = 100;
+
+void show_pm_error(const char* title, PmError code) {
+	char os_error[1024];
+	if (code == pmHostError)
+		Pm_GetHostErrorText(os_error, 1024);
+	IupMessage(title, code == pmHostError ? os_error : Pm_GetErrorText(code));
+}
 
 int main(int argc, char** argv) {
 	IupOpen(&argc, &argv);
@@ -18,7 +23,7 @@ int main(int argc, char** argv) {
 	PmError err;
 
 	if ((err = Pm_Initialize()) != pmNoError) {
-		IupMessage("PortMidi fatal error",Pm_GetErrorText(err));
+		show_pm_error("PortMidi fatal error",err);
 		return (int)err;
 	}
 
@@ -45,10 +50,9 @@ int main(int argc, char** argv) {
 		NULL /* no arguments to timing function, either */,
 		latency
 	)) != pmNoError) {
-		IupMessage("PortMidi fatal error", Pm_GetErrorText(err));
+		show_pm_error("PortMidi fatal error", err);
 		return err;
 	}
-	/* TODO: logic to get OS error explanation */
 
 #if 0
 	/* construct & write on the fly like this */
