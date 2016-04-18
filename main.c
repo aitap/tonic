@@ -24,8 +24,6 @@ PmTimestamp my_timer (void* wtf) {
 }
 
 int open_audio_callback(Ihandle* button) {
-	PmError err;
-
 	if (midi) 
     	if (show_if_pm_error(Pm_Close(midi)) != pmNoError)
 			return IUP_DEFAULT;
@@ -52,6 +50,7 @@ int open_audio_callback(Ihandle* button) {
 
 int set_program_callback(Ihandle* button) {
 	show_if_pm_error(Pm_WriteShort(midi,0,Pm_Message(0xC0, IupGetInt(program_number,"VALUE"), 0)));
+	return IUP_DEFAULT;
 }	
 
 int main(int argc, char** argv) {
@@ -61,7 +60,7 @@ int main(int argc, char** argv) {
 
 	{
 		PmError err;
-		if (show_if_pm_error(Pm_Initialize()) != pmNoError) {
+		if ((err = show_if_pm_error(Pm_Initialize())) != pmNoError) {
 			return (int)err;
 		}
 	}
@@ -126,39 +125,6 @@ int main(int argc, char** argv) {
 	,"K_ANY",(Icallback)keypress_callback,NULL),"TITLE=\"Tonic\",RESIZE=NO"));
 	IupMainLoop();
 	IupClose();
-
-#if 0
-	/* construct & write on the fly like this */
-    /* short note-on */
-    Pm_WriteShort(midi, Pt_Time(),
-                  Pm_Message(0x90, 60, 100));
-    /* short note-off */
-    Pm_WriteShort(midi, Pt_Time(),
-                  Pm_Message(0x90, 60, 0));
-#endif
-
-#if 0
-	/* see test.c for a working example without 100%CPU busy-loop */
-    /* output several note on/offs to test timing. 
-       Should be 1s between notes */
-    /* arpeggio chord (because latency is on) */
-    timestamp = Pt_Time();
-    for (int i = 0; i < chord_size; i++) {
-        buffer[i].timestamp = timestamp + diff * i;
-        buffer[i].message = Pm_Message(0x90, chord[i], 100);
-    }
-    Pm_Write(midi, buffer, chord_size);
-
-    off_time = timestamp + diff + chord_size * diff; 
-    while (Pt_Time() < off_time) 
-		/* busy wait */; /* ewwwww */
-
-    for (int i = 0; i < chord_size; i++) {
-        buffer[i].timestamp = timestamp + diff * i;
-        buffer[i].message = Pm_Message(0x90, chord[i], 0);
-    }
-    Pm_Write(midi, buffer, chord_size);    
-#endif
 
     Pm_Close(midi);
     Pm_Terminate();
