@@ -99,6 +99,7 @@ int main(int argc, char** argv) {
 	}
 	IupSetAttribute(device_list, "DROPDOWN", "YES");
 	IupSetInt(device_list, "VALUE", out+1);
+	open_audio_callback(NULL); // everything is set up => try to open out device
 
 	program_number = IupSetAttributes(IupText(NULL),"VALUE=0,SPIN=YES,SPINMIN=0,SPINMAX=255,SPININC=1");
 	IupSetAttribute(program_number, "MASK", IUP_MASK_INT);
