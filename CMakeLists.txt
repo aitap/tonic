@@ -21,5 +21,5 @@ find_package(ALSA)
 
 include_directories(${IUP_INC} ${PORTMIDI_INC})
 link_directories(${IUP_LIB} ${PORTMIDI_LIB} ${ALSA_LIBRARY})
-add_executable(tonic main.c game.c)
-target_link_libraries(tonic iup portmidi)
+add_executable(tonic main.c game.c keys.c)
+target_link_libraries(tonic iup portmidi porttime)

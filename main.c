@@ -19,6 +19,10 @@ PmError show_if_pm_error(PmError code) {
 	return code;
 }
 
+PmTimestamp my_timer (void* wtf) {
+	return (PtTimestamp)Pt_Time();
+}
+
 int open_audio_callback(Ihandle* button) {
 	PmError err;
 
@@ -38,7 +42,7 @@ int open_audio_callback(Ihandle* button) {
 		outs[out_number] /* number of MIDI output */,
 		NULL /* optional driver-specific wtf */,
 		0 /* apparently I don't need to buffer */,
-		NULL /* default timing function */,
+		(PmTimeProcPtr)my_timer /* adapt porttime to portmidi's function pointer requirements */,
 		NULL /* no arguments to timing function, either */,
 		latency
 	));
@@ -52,6 +56,8 @@ int set_program_callback(Ihandle* button) {
 
 int main(int argc, char** argv) {
 	IupOpen(&argc, &argv);
+
+	Pt_Start(1 /* resolution, ms */, NULL /* no callback */, NULL);
 
 	{
 		PmError err;
@@ -99,11 +105,11 @@ int main(int argc, char** argv) {
 
 	key_text = IupLabel("___-____");
 	IupSetInt(key_text,"FONTSIZE",IupGetInt(key_text,"FONTSIZE")*2);
-	chord_text = IupLabel("__ __");
+	chord_text = IupLabel("__");
 	IupSetInt(chord_text,"FONTSIZE",IupGetInt(chord_text,"FONTSIZE")*4);
 
 	srand((unsigned int)time(NULL));
-	// TODO: generate and set a new key there
+	change_key();
 
 #define IupHorizExpand(x) IupSetAttributes((x),"EXPAND=HORIZONTAL")
 #define IupAlignCenter(x) IupSetAttributes((x),"ALIGNMENT=ACENTER:ACENTER")
@@ -115,7 +121,7 @@ int main(int argc, char** argv) {
 				IupSetCallbacks(IupButton("Set program",NULL),"ACTION",(Icallback)set_program_callback,NULL),
 			NULL),
 			IupHorizExpand(IupAlignCenter(key_text)), IupHorizExpand(IupAlignCenter(chord_text)),
-			IupHorizExpand(IupAlignCenter(IupLabel("ctrl+1..7 - guess\nspace - play chord\nenter - new key"))),
+			IupHorizExpand(IupAlignCenter(IupLabel("guess: ctrl+1..7\nplay chord again: 0\nnew key: -"))),
 		NULL))
 	,"K_ANY",(Icallback)keypress_callback,NULL),"TITLE=\"Tonic\",RESIZE=NO"));
 	IupMainLoop();
