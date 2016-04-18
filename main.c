@@ -1,10 +1,3 @@
-#include <portmidi.h>
-#include <porttime.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-#include <iup.h>
 #include "tonic.h"
 
 /* globals, ewwwwww */
@@ -104,22 +97,27 @@ int main(int argc, char** argv) {
 	program_number = IupSetAttributes(IupText(NULL),"VALUE=0,SPIN=YES,SPINMIN=0,SPINMAX=255,SPININC=1");
 	IupSetAttribute(program_number, "MASK", IUP_MASK_INT);
 
-	key_text = IupLabel("<key>");
-	chord_text = IupLabel("<chord>");
+	key_text = IupLabel("___-____");
+	IupSetInt(key_text,"FONTSIZE",IupGetInt(key_text,"FONTSIZE")*2);
+	chord_text = IupLabel("__ __");
+	IupSetInt(chord_text,"FONTSIZE",IupGetInt(chord_text,"FONTSIZE")*4);
+
+	srand((unsigned int)time(NULL));
+	// TODO: generate and set a new key there
 
 #define IupHorizExpand(x) IupSetAttributes((x),"EXPAND=HORIZONTAL")
 #define IupAlignCenter(x) IupSetAttributes((x),"ALIGNMENT=ACENTER:ACENTER")
 	IupShow(IupSetAttributes(
-		IupDialog(IupVbox(
+		IupSetCallbacks(IupDialog(IupVbox(
 			IupHbox(IupHorizExpand(device_list),IupSetCallbacks(IupButton("Open",NULL),"ACTION",(Icallback)open_audio_callback,NULL),NULL),
 			IupHbox(
 				IupHorizExpand(program_number),
 				IupSetCallbacks(IupButton("Set program",NULL),"ACTION",(Icallback)set_program_callback,NULL),
 			NULL),
 			IupHorizExpand(IupAlignCenter(key_text)), IupHorizExpand(IupAlignCenter(chord_text)),
-			IupHorizExpand(IupAlignCenter(IupLabel("1..7 - guess\nspace - play again\nenter - new key"))),
-		NULL)),
-	"TITLE=\"Tonic\",RESIZE=NO"));
+			IupHorizExpand(IupAlignCenter(IupLabel("ctrl+1..7 - guess\nspace - play chord\nenter - new key"))),
+		NULL))
+	,"K_ANY",(Icallback)keypress_callback,NULL),"TITLE=\"Tonic\",RESIZE=NO"));
 	IupMainLoop();
 	IupClose();
 
