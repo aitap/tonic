@@ -39,7 +39,6 @@ void check_guess(int pressed) {
 
 	if (!guess) return;
 	
-	IupMessagef("","Human guess is %d", guess);
 	if (guess-1 == current_note)
 		IupSetAttribute(chord_text, "FGCOLOR", "#00AA00");
 	else 

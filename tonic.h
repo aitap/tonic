@@ -30,7 +30,6 @@ typedef struct {
 	const char* minor_name;
 	const int major_tonic;
 	const int minor_tonic;
-	const int signature[7];
 } tone_struct;
 
 extern tone_struct keys[];
