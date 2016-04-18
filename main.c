@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
 			size_t length = snprintf(NULL, 0, "%d", j)+1;
 			char* att_name = malloc(length);
 			assert(att_name); // I don't think there's a way to continue working there
-			snprintf(att_name, length, "%d", j);
+			snprintf(att_name, length, "%d", j+1);
 			IupSetAttribute(device_list, att_name, Pm_GetDeviceInfo(outs[j])->name);
 			free(att_name);
 		}
