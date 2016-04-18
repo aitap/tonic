@@ -88,10 +88,13 @@ int main(int argc, char** argv) {
 		}
 		/* at this point valid device IDs are in range 0..num_outs-1 */
 
-		char att_name[] = "1";
 		for (size_t j = 0; j < num_outs; j++) {
+			size_t length = snprintf(NULL, 0, "%d", j)+1;
+			char* att_name = malloc(length);
+			assert(att_name); // I don't think there's a way to continue working there
+			snprintf(att_name, length, "%d", j);
 			IupSetAttribute(device_list, att_name, Pm_GetDeviceInfo(outs[j])->name);
-			att_name[0]++; // '1' -> '2', ...
+			free(att_name);
 		}
 	}
 	IupSetAttribute(device_list, "DROPDOWN", "YES");
