@@ -20,13 +20,13 @@ find_path(PORTMIDI_LIB
 include_directories(${IUP_INC} ${PORTMIDI_INC})
 link_directories(${IUP_LIB} ${PORTMIDI_LIB})
 
+add_executable(tonic main.c game.c keys.c)
 if(WIN32)
 	# apparently, on Win32 portmidi consists of one DLL
 	set(PORTLIBRARIES portmidi)
 	# tonic.exe is a GUI app
-	add_compile_options(-mwindows)
+	set_target_properties(tonic PROPERTIES LINK_FLAGS -mwindows)
 else()
 	set(PORTLIBRARIES portmidi porttime)
 endif()
-add_executable(tonic main.c game.c keys.c)
 target_link_libraries(tonic iup ${PORTLIBRARIES})
