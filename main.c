@@ -120,7 +120,7 @@ int main(int argc, char** argv) {
 				IupSetCallbacks(IupButton("Set program",NULL),"ACTION",(Icallback)set_program_callback,NULL),
 			NULL),
 			IupHorizExpand(IupAlignCenter(key_text)), IupHorizExpand(IupAlignCenter(chord_text)),
-			IupHorizExpand(IupAlignCenter(IupLabel("guess: ctrl+1..7\nplay chord again: 0\nnew key: -"))),
+			IupHorizExpand(IupAlignCenter(IupLabel("guess: ctrl+1..7\nplay chord again: =\nplay tonic again: t\nnew key: -"))),
 		NULL))
 	,"K_ANY",(Icallback)keypress_callback,NULL),"TITLE=\"Tonic\",RESIZE=NO"));
 	IupMainLoop();

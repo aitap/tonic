@@ -5,7 +5,7 @@ int current_note = 0;
 
 const int period = 1250; /* ms */
 
-void sound_chord(void) {
+void sound_chord(int tonic) {
 	PmTimestamp now = my_timer(NULL);
 	PmEvent chord[6];
 	for (int i = 0; i < 3; i++) {
@@ -14,7 +14,7 @@ void sound_chord(void) {
 				current_minor ?
 				keys[current_key].minor_tonic :
 				keys[current_key].major_tonic
-			) + ((current_note + i*2)%7)[
+			) + (((tonic ? 0 : current_note) + i*2)%7)[
 				current_minor ? minor_semitones : major_semitones
 			];
 		chord[i].timestamp = now;
@@ -46,7 +46,7 @@ void check_guess(int pressed) {
 
 	IupSetAttribute(chord_text, "TITLE", steps[current_note]);
 	current_note = rand()%steps_size;
-	sound_chord();
+	sound_chord(0);
 }
 
 void change_key(void) {
@@ -61,7 +61,7 @@ void change_key(void) {
 	);
 	IupSetAttribute(chord_text,"TITLE",steps[0]);
 	IupSetAttribute(chord_text,"FGCOLOR","#000000");
-	sound_chord();
+	sound_chord(0);
 }
 
 int keypress_callback(Ihandle* dialog, int pressed) {
@@ -71,8 +71,11 @@ int keypress_callback(Ihandle* dialog, int pressed) {
 			case K_minus:
 				change_key();
 				break;
-			case K_0:
-				sound_chord();
+			case K_equal:
+				sound_chord(0);
+				break;
+			case K_t:
+				sound_chord(1);
 				break;
 		}
 	}
