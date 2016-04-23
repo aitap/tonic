@@ -8,6 +8,7 @@
 #include <iup.h>
 #include <iupkey.h>
 #include <time.h>
+#include <stdbool.h>
 
 extern PmStream* midi;
 extern PmDeviceID* outs;
@@ -23,7 +24,7 @@ void change_key(void);
 
 extern int current_key;
 extern int current_note;
-extern int current_minor;
+extern bool current_minor;
 
 typedef struct {
 	const char* major_name;

@@ -1,26 +1,27 @@
 #include "tonic.h"
 int current_key = 0;
-int current_minor = 0;
+bool current_minor = false;
 int current_note = 0;
 
 const int period = 1250; /* ms */
 
-void sound_chord(int tonic) {
+void sound_chord(int key, int note, bool minor) {
 	PmTimestamp now = my_timer(NULL);
 	PmEvent chord[6];
 	for (int i = 0; i < 3; i++) {
-		int note = 
-			(
-				current_minor ?
-				keys[current_key].minor_tonic :
-				keys[current_key].major_tonic
-			) + (((tonic ? 0 : current_note) + i*2)%7)[
-				current_minor ? minor_semitones : major_semitones
-			];
+		int abs_note =
+			( /* first, get the absolute tonic number */
+				minor ?
+				keys[key].minor_tonic :
+				keys[key].major_tonic
+			) + ((note + i*2)%7)[ /* add the offset of the (0..6)th note of the key */
+				minor ? minor_semitones : major_semitones /* which could be major/minor */
+			] + 12 * ( (note+i*2)/7 ); /* finally, add an octave to notes which are above 7th note */
 		chord[i].timestamp = now;
-		chord[i].message = Pm_Message(0x90, note, 100);
+		chord[i].message = Pm_Message(0x90, abs_note, 100);
 		chord[i+3].timestamp = now+period;
-		chord[i+3].message = Pm_Message(0x80, note, 100);
+		chord[i+3].message = Pm_Message(0x80, abs_note, 100);
+		printf("key=%d note=%d minor=%d i=%d abs_note=%d\n", key, note, minor, i, abs_note);
 	}
 	Pm_Write(midi, chord, 6);
 }
@@ -46,7 +47,7 @@ void check_guess(int pressed) {
 
 	IupSetAttribute(chord_text, "TITLE", steps[current_note]);
 	current_note = rand()%steps_size;
-	sound_chord(0);
+	sound_chord(current_key, current_note, current_minor);
 }
 
 void change_key(void) {
@@ -61,7 +62,7 @@ void change_key(void) {
 	);
 	IupSetAttribute(chord_text,"TITLE",steps[0]);
 	IupSetAttribute(chord_text,"FGCOLOR","#000000");
-	sound_chord(0);
+	sound_chord(current_key, current_note, current_minor);
 }
 
 int keypress_callback(Ihandle* dialog, int pressed) {
@@ -72,10 +73,10 @@ int keypress_callback(Ihandle* dialog, int pressed) {
 				change_key();
 				break;
 			case K_equal:
-				sound_chord(0);
+				sound_chord(current_key, current_note, current_minor);
 				break;
 			case K_t:
-				sound_chord(1);
+				sound_chord(current_key, 0, current_minor);
 				break;
 		}
 	}
