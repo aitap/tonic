@@ -21,7 +21,6 @@ void sound_chord(int key, int note, bool minor) {
 		chord[i].message = Pm_Message(0x90, abs_note, 100);
 		chord[i+3].timestamp = now+period;
 		chord[i+3].message = Pm_Message(0x80, abs_note, 100);
-		printf("key=%d note=%d minor=%d i=%d abs_note=%d\n", key, note, minor, i, abs_note);
 	}
 	Pm_Write(midi, chord, 6);
 }
