@@ -20,6 +20,7 @@ PmError show_if_pm_error(PmError code) {
 }
 
 PmTimestamp my_timer (void* wtf) {
+	(void)wtf; /* Pt_Time doesn't need any arguments, but PmTimeProc does */
 	return (PtTimestamp)Pt_Time();
 }
 
@@ -44,7 +45,8 @@ int open_audio_callback(Ihandle* button) {
 		NULL /* no arguments to timing function, either */,
 		latency
 	));
-	/* FIXME: only at this point it's safe to continue, otherwise app should quit or something */
+
+	/* PortMidi seems to return error codes if given a NULL, so no abort() here */
 	return IUP_DEFAULT;
 }
 
@@ -77,6 +79,7 @@ int main(int argc, char** argv) {
 	{
 		int num_devices = Pm_CountDevices();
 		outs = calloc(num_devices, sizeof(PmDeviceID));
+		assert(outs);
 	
 		for (PmDeviceID i = 0; i < num_devices; i++) {
 			if (Pm_GetDeviceInfo(i)->output) {

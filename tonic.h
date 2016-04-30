@@ -39,3 +39,6 @@ extern char* steps[];
 extern size_t steps_size;
 extern int major_semitones[];
 extern int minor_semitones[];
+
+/* interface defines */
+#define tonic_single_note_checkbox "tonic_single_note_checkbox"
