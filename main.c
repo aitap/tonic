@@ -15,7 +15,7 @@ PmError show_if_pm_error(PmError code) {
 	if (code == pmNoError) return code;
 	if (code == pmHostError)
 		Pm_GetHostErrorText(os_error, 1024);
-	IupMessage("PortMidi fatal error", code == pmHostError ? os_error : Pm_GetErrorText(code));
+	IupMessage("PortMidi error", code == pmHostError ? os_error : Pm_GetErrorText(code));
 	return code;
 }
 
