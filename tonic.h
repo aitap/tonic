@@ -16,9 +16,8 @@ extern PmStream* midi; // current output
 extern PmDeviceID* outs; // array of output indices
 extern size_t num_outs; // size of array of output indices
 //  interface handles
-extern Ihandle* device_list; // list of midi outs
-extern Ihandle* program_number; // instrument number
 extern Ihandle *key_text, *chord_text; // current key and previous answer
+extern Ihandle *single_note_checkbox; // play single notes instead of triads
 //  game variables
 extern int current_key;
 extern int current_note;
@@ -46,6 +45,3 @@ extern char* steps[]; // names of steps of a key
 extern size_t steps_size; // size of ^^^
 extern int major_semitones[]; // offsets in semitones between a tonic and a note in a major key
 extern int minor_semitones[]; // likewise, but minor
-
-/* interface defines */
-#define tonic_single_note_checkbox "tonic_single_note_checkbox"

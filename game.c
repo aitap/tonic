@@ -28,7 +28,7 @@ void sound_chord(int key, int note, bool minor, bool single_note) {
 }
 
 bool current_single_note() {
-	return (bool)IupGetInt(IupGetHandle(tonic_single_note_checkbox),"VALUE");
+	return (bool)IupGetInt(single_note_checkbox,"VALUE");
 }
 
 void check_guess(int pressed) {

@@ -7,6 +7,7 @@ size_t num_outs = 0;
 Ihandle* device_list = NULL; /* select MIDI output */
 Ihandle* program_number = NULL; /* enter instrument number */
 Ihandle *key_text, *chord_text; /* show current key and whether the guess was correct */
+Ihandle* single_note_checkbox = NULL; /* play single notes, not triads */
 
 const int32_t latency = 16; /* I need timestamps, and 16ms seems reasonable */
 
@@ -113,6 +114,8 @@ int main(int argc, char** argv) {
 	srand((unsigned int)time(NULL));
 	change_key();
 
+	single_note_checkbox = IupToggle("Single notes",NULL);
+
 #define IupHorizExpand(x) IupSetAttributes((x),"EXPAND=HORIZONTAL")
 #define IupAlignCenter(x) IupSetAttributes((x),"ALIGNMENT=ACENTER:ACENTER")
 	IupShow(IupSetAttributes(
@@ -122,11 +125,11 @@ int main(int argc, char** argv) {
 				IupHorizExpand(program_number),
 				IupSetCallbacks(IupButton("Set program",NULL),"ACTION",(Icallback)set_program_callback,NULL),
 			NULL),
-			IupSetAtt(tonic_single_note_checkbox,IupToggle("Single notes",NULL),NULL),
+			single_note_checkbox,
 			IupHorizExpand(IupAlignCenter(key_text)), IupHorizExpand(IupAlignCenter(chord_text)),
 			IupHorizExpand(IupAlignCenter(IupLabel("guess: ctrl+1..7\nplay chord again: =\nplay tonic again: t\nnew key: -"))),
-		NULL))
-	,"K_ANY",(Icallback)keypress_callback,NULL),"TITLE=\"Tonic\",RESIZE=NO"));
+		NULL)),"K_ANY",(Icallback)keypress_callback,NULL),
+	"TITLE=\"Tonic\",RESIZE=NO"));
 	IupMainLoop();
 	IupClose();
 
