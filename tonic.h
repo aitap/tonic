@@ -18,6 +18,7 @@ extern Ihandle* program_number;
 extern Ihandle *key_text, *chord_text;
 
 PmTimestamp my_timer(void*);
+PmError show_if_pm_error(PmError);
 
 int keypress_callback(Ihandle*, int);
 void change_key(void);
