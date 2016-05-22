@@ -20,7 +20,17 @@ find_path(PORTMIDI_LIB
 include_directories(${IUP_INC} ${PORTMIDI_INC})
 link_directories(${IUP_LIB} ${PORTMIDI_LIB})
 
-add_executable(tonic main.c game.c keys.c)
+if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
+	add_compile_options(-std=c99)
+endif()
+
+set (TONIC_SOURCE main.c game.c keys.c)
+if(WIN32)
+	# support modern UI and high DPI
+	set(TONIC_SOURCE ${TONIC_SOURCE} iup.rc)
+endif()
+
+add_executable(tonic ${TONIC_SOURCE})
 if(WIN32)
 	# apparently, on Win32 portmidi consists of one DLL
 	set(PORTLIBRARIES portmidi)
@@ -29,4 +39,5 @@ if(WIN32)
 else()
 	set(PORTLIBRARIES portmidi porttime)
 endif()
+
 target_link_libraries(tonic iup ${PORTLIBRARIES})

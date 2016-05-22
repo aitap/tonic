@@ -1,0 +1,5 @@
+#ifdef _WIN64
+1 24 "iup64.manifest"
+#else
+1 24 "iup.manifest"
+#endif
