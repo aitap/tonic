@@ -67,7 +67,7 @@ void change_key(void) {
 	);
 	IupSetAttribute(chord_text,"TITLE",steps[0]);
 	IupSetAttribute(chord_text,"FGCOLOR","#000000");
-	sound_chord(current_key, current_note, current_minor, current_single_note());
+	sound_chord(current_key, current_note, current_minor, false);
 }
 
 int keypress_callback(Ihandle* dialog, int pressed) {
