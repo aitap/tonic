@@ -1,4 +1,6 @@
 #include "tonic.h"
+/* the icon */
+extern unsigned char tonic_64x64_rgba[];
 
 /* globals, ewwwwww */
 PmStream* midi = NULL;
@@ -116,6 +118,8 @@ int main(int argc, char** argv) {
 
 	single_note_checkbox = IupToggle("Single notes",NULL);
 
+	IupSetHandle("Tonic_icon",IupImageRGBA(64,64,tonic_64x64_rgba));
+
 #define IupHorizExpand(x) IupSetAttributes((x),"EXPAND=HORIZONTAL")
 #define IupAlignCenter(x) IupSetAttributes((x),"ALIGNMENT=ACENTER:ACENTER")
 	IupShow(IupSetAttributes(
@@ -129,7 +133,8 @@ int main(int argc, char** argv) {
 			IupHorizExpand(IupAlignCenter(key_text)), IupHorizExpand(IupAlignCenter(chord_text)),
 			IupHorizExpand(IupAlignCenter(IupLabel("guess: ctrl+1..7\nplay chord again: =\nplay tonic again: t\nnew key: -"))),
 		NULL)),"K_ANY",(Icallback)keypress_callback,NULL),
-	"TITLE=\"Tonic\",RESIZE=NO"));
+	"TITLE=\"Tonic\",RESIZE=NO,ICON=\"Tonic_icon\""));
+
 	IupMainLoop();
 	IupClose();
 

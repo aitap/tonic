@@ -24,7 +24,7 @@ if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
 	add_compile_options(-std=c99)
 endif()
 
-set (TONIC_SOURCE main.c game.c keys.c)
+set (TONIC_SOURCE main.c game.c keys.c logo/tonic_64x64_rgba.c)
 if(WIN32)
 	# support modern UI and high DPI
 	set(TONIC_SOURCE ${TONIC_SOURCE} iup.rc)
