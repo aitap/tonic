@@ -57,7 +57,13 @@ int set_program_callback(Ihandle* button) {
 int main(int argc, char** argv) {
 	IupOpen(&argc, &argv);
 
-	Pt_Start(1 /* resolution, ms */, NULL /* no callback */, NULL);
+	{
+		PtError err;
+		if ((err = Pt_Start(1 /* resolution, ms */, NULL /* no callback */, NULL)) != ptNoError) {
+			IupMessagef("PortTime error", "Pt_Start returned error code %d", err);
+			return (int)err;
+		}
+	}
 
 	{
 		PmError err;
