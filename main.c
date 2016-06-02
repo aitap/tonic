@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
 	srand((unsigned int)time(NULL));
 	change_key();
 
-	single_note_checkbox = IupToggle("Single notes",NULL);
+	single_note_checkbox = IupSetAttributes(IupToggle("Single notes",NULL),"VALUE=ON");
 
 	IupSetHandle("Tonic_icon",IupImageRGBA(64,64,tonic_64x64_rgba));
 
