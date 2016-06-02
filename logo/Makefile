@@ -9,7 +9,7 @@ convert = convert $(1) -resize $(2) -gravity center -extent $(2) $(4) $(3)
 tonic_%.png: src.svg
 	$(call convert,src.svg,$*,$@,)
 
-tonic.ico: tonic_16x16.png tonic_32x32.png tonic_48x48.png
+tonic.ico: tonic_16x16.png tonic_32x32.png tonic_48x48.png tonic_256x256.png
 	icotool -c -o tonic.ico $^
 
 tonic_64x64_rgba.c: src.svg

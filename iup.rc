@@ -1,3 +1,4 @@
+1 ICON "logo/tonic.ico"
 #ifdef _WIN64
 1 24 "iup64.manifest"
 #else
