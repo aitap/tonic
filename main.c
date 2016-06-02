@@ -5,7 +5,6 @@ extern unsigned char tonic_64x64_rgba[];
 /* globals, ewwwwww */
 PmStream* midi = NULL;
 PmDeviceID* outs = NULL;
-size_t num_outs = 0;
 Ihandle* device_list = NULL; /* select MIDI output */
 Ihandle* program_number = NULL; /* enter instrument number */
 Ihandle *key_text, *chord_text; /* show current key and whether the guess was correct */
@@ -35,9 +34,6 @@ int open_audio_callback(Ihandle* button) {
 	midi=NULL;
 
 	int out_number = IupGetInt(device_list, "VALUE") - 1;
-	/* assure compiler I know what I'm doing */
-	assert(out_number < (int)num_outs);
-	assert(out_number >= 0);
 	
     show_if_pm_error(Pm_OpenOutput(
 		&midi /* struct to work with */,
@@ -79,6 +75,7 @@ int main(int argc, char** argv) {
 
 	device_list = IupList(NULL); /* ask the user which output device they want */
 
+	size_t num_outs = 0;
 	{
 		int num_devices = Pm_CountDevices();
 		outs = calloc(num_devices, sizeof(PmDeviceID));

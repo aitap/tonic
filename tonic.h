@@ -14,7 +14,6 @@
 //  midi out-related variables
 extern PmStream* midi; // current output
 extern PmDeviceID* outs; // array of output indices
-extern size_t num_outs; // size of array of output indices
 //  interface handles
 extern Ihandle *key_text, *chord_text; // current key and previous answer
 extern Ihandle *single_note_checkbox; // play single notes instead of triads
