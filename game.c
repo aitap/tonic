@@ -5,6 +5,20 @@ int current_note = 0;
 
 const int period = 1250; /* ms */
 
+int uniform_random(int min, int max) {
+	/* according to Numerical Recipes in C, applying % to rand() damages uniformness
+	 * rand/RAND_MAX => [0,1], with 1.0 being very rare
+	 * rand/(RAND_MAX+1) => [0,1)
+	 * (max-min+1)*rand/(RAND_MAX+1) => [0,max-min+1), as uniform as rand itself
+	 * (int) transforms that into uniformly distributed [0,max-min]
+	 * + min => [min,max]
+	 */
+	return min + (int)(
+		rand() * (double)(max-min+1)
+		/(RAND_MAX + 1.0)
+	);
+}
+
 void sound_chord(int key, int note, bool minor, bool single_note) {
 	PmTimestamp now = my_timer(NULL);
 	PmEvent chord[6];
@@ -51,13 +65,13 @@ void check_guess(int pressed) {
 		IupSetAttribute(chord_text, "FGCOLOR", "#AA0000");
 
 	IupSetAttribute(chord_text, "TITLE", steps[current_note]);
-	current_note = rand()%steps_size;
+	current_note = uniform_random(0,steps_size-1);
 	sound_chord(current_key, current_note, current_minor, current_single_note());
 }
 
 void change_key(void) {
-	current_key = rand()%keys_size;
-	current_minor = rand()%2;
+	current_key = uniform_random(0,keys_size-1);
+	current_minor = uniform_random(0,1);
 	current_note = 0;
 	IupSetAttribute(key_text,
 		"TITLE",
