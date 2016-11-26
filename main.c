@@ -35,7 +35,7 @@ int open_audio_callback(Ihandle* button) {
 
 	int out_number = IupGetInt(device_list, "VALUE") - 1;
 	
-    show_if_pm_error(Pm_OpenOutput(
+	show_if_pm_error(Pm_OpenOutput(
 		&midi /* struct to work with */,
 		outs[out_number] /* number of MIDI output */,
 		NULL /* optional driver-specific wtf */,
@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
 			return (int)err;
 		}
 	}
-
+	/* note: these are different kinds of errors */
 	{
 		PmError err;
 		if ((err = show_if_pm_error(Pm_Initialize())) != pmNoError) {
@@ -139,10 +139,9 @@ int main(int argc, char** argv) {
 	"TITLE=\"Tonic\",RESIZE=NO,ICON=\"Tonic_icon\""));
 
 	IupMainLoop();
-	IupClose();
 
-    Pm_Close(midi);
-    Pm_Terminate();
+	Pm_Close(midi);
+	Pm_Terminate();
 
 	IupClose();
 
