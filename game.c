@@ -6,7 +6,7 @@ int current_note = 0;
 const int period = 1250; /* ms */
 
 int uniform_random(int min, int max) {
-	/* according to Numerical Recipes in C, applying % to rand() damages uniformness
+	/* according to Numerical Recipes in C, applying % to rand() may damage uniformness
 	 * rand/RAND_MAX => [0,1], with 1.0 being very rare
 	 * rand/(RAND_MAX+1) => [0,1)
 	 * (max-min+1)*rand/(RAND_MAX+1) => [0,max-min+1), as uniform as rand itself
@@ -30,9 +30,11 @@ void sound_chord(int key, int note, bool minor, bool single_note) {
 				minor ?
 				keys[key].minor_tonic :
 				keys[key].major_tonic
-			) + ((note + i*2)%7)[ /* add the offset of the (0..6)th note of the key */
-				minor ? minor_semitones : major_semitones /* which could be major/minor */
-			] + 12 * ( (note+i*2)/7 ); /* finally, add an octave to notes which are above 7th note */
+			)
+			/* add the offset of the (0..6)th note of the key */
+			/* which could be major/minor */
+			+ (minor ? minor_semitones : major_semitones)[(note + i*2)%7]
+			+ 12 * ( (note+i*2)/7 ); /* finally, add an octave to notes which are above 7th note */
 		chord[i].timestamp = now;
 		chord[i].message = Pm_Message(0x90, abs_note, 100);
 		chord[i+max_note].timestamp = now+period;
