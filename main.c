@@ -2,42 +2,39 @@
 /* the icon */
 extern unsigned char tonic_64x64_rgba[];
 
-/* globals, ewwwwww */
-PmStream* midi = NULL;
-PmDeviceID* outs = NULL;
-Ihandle* device_list = NULL; /* select MIDI output */
-Ihandle* program_number = NULL; /* enter instrument number */
-Ihandle *key_text, *chord_text; /* show current key and whether the guess was correct */
-Ihandle* single_note_checkbox = NULL; /* play single notes, not triads */
-
-const int32_t latency = 16; /* I need timestamps, and 16ms seems reasonable */
+static const int32_t latency = 16; /* I need timestamps, and 16ms seems reasonable */
+static const size_t err_msg_len = 1024;
 
 PmError show_if_pm_error(PmError code) {
-	char os_error[1024];
+	char os_error[err_msg_len]; // will it blow up?
 	if (code == pmNoError) return code;
 	if (code == pmHostError)
-		Pm_GetHostErrorText(os_error, 1024);
+		Pm_GetHostErrorText(os_error, err_msg_len);
 	IupMessage("PortMidi error", code == pmHostError ? os_error : Pm_GetErrorText(code));
 	return code;
 }
 
-PmTimestamp my_timer (void* wtf) {
-	(void)wtf; /* Pt_Time doesn't need any arguments, but PmTimeProc does */
+PmTimestamp my_timer (void* unused) {
+	(void)unused; /* Pt_Time doesn't need any arguments, but PmTimeProc does */
 	return (PtTimestamp)Pt_Time();
 }
 
-int open_audio_callback(Ihandle* button) {
-	if (midi) 
-    	if (show_if_pm_error(Pm_Close(midi)) != pmNoError)
-			return IUP_DEFAULT;
+static int open_audio_callback(Ihandle* button) {
+	struct game * game = (struct game*)IupGetGlobal("struct_game");
 
-	midi=NULL;
+	if (
+		game->midi &&
+		(show_if_pm_error(Pm_Close(game->midi)) != pmNoError)
+	) return IUP_DEFAULT;
 
-	int out_number = IupGetInt(device_list, "VALUE") - 1;
+	game->midi=NULL;
+
+	size_t out_number = (size_t)IupGetInt((Ihandle*)IupGetAttribute(button,"device_list"), "VALUE");
+	if (!out_number) return IUP_DEFAULT; // can be zero if there is no selected item, otherwise belongs to 1..N
 	
 	show_if_pm_error(Pm_OpenOutput(
-		&midi /* struct to work with */,
-		outs[out_number] /* number of MIDI output */,
+		&game->midi /* struct to work with */,
+		game->outs[out_number-1] /* number of MIDI output */,
 		NULL /* optional driver-specific wtf */,
 		0 /* apparently I don't need to buffer */,
 		(PmTimeProcPtr)my_timer /* adapt porttime to portmidi's function pointer requirements */,
@@ -49,8 +46,18 @@ int open_audio_callback(Ihandle* button) {
 	return IUP_DEFAULT;
 }
 
-int set_program_callback(Ihandle* button) {
-	show_if_pm_error(Pm_WriteShort(midi,0,Pm_Message(0xC0, IupGetInt(program_number,"VALUE"), 0)));
+static int set_program_callback(Ihandle* button) {
+	show_if_pm_error(
+		Pm_WriteShort(
+			((struct game*)IupGetGlobal("struct_game"))->midi,
+			0,
+			Pm_Message(
+				0xC0,
+				IupGetInt((Ihandle*)IupGetAttribute(button,"program_number"),"VALUE"),
+				0
+			)
+		)
+	);
 	return IUP_DEFAULT;
 }	
 
@@ -64,7 +71,7 @@ int main(int argc, char** argv) {
 			return (int)err;
 		}
 	}
-	/* note: these are different kinds of errors */
+	/* note: the former was a PtError, not a PmError */
 	{
 		PmError err;
 		if ((err = show_if_pm_error(Pm_Initialize())) != pmNoError) {
@@ -77,19 +84,22 @@ int main(int argc, char** argv) {
 		IupMessage("No MIDI devices", "Apparently, there are no MIDI output devices on your machine. Perhaps you need to run a software synsthesizer?");
 		return 1;
 	}
-	/* at this point we probably have at least one output device */
+	/* at this point we should have at least one output device */
 
-	device_list = IupList(NULL); /* ask the user which output device they want */
+	struct game game = {};
+	IupSetGlobal("struct_game",(void*)&game);
 
-	size_t num_outs = 0;
+	Ihandle * device_list = IupList(NULL); /* ask the user which output device they want */
+
 	{
-		int num_devices = Pm_CountDevices();
-		outs = calloc(num_devices, sizeof(PmDeviceID));
-		assert(outs);
+		size_t num_outs = 0;
+		size_t num_devices = (size_t)Pm_CountDevices(); // docs state that ids range from 0 to Pm_CountDevices()-1
+		game.outs = calloc(num_devices, sizeof(PmDeviceID)); // outs <= all devices, so some of these will be unused
+		assert(game.outs);
 	
 		for (PmDeviceID i = 0; i < num_devices; i++) {
 			if (Pm_GetDeviceInfo(i)->output) {
-				outs[num_outs] = i;
+				game.outs[num_outs] = i;
 				num_outs++;
 			}
 		}
@@ -98,28 +108,42 @@ int main(int argc, char** argv) {
 		for (size_t j = 0; j < num_outs; j++) {
 			size_t length = snprintf(NULL, 0, "%d", j)+1;
 			char* att_name = malloc(length);
-			assert(att_name); // I don't think there's a way to continue working there
+			assert(att_name); // failure to allocate 2..3 bytes should be fatal (does anyone have 1000 MIDI outputs?)
 			snprintf(att_name, length, "%d", j+1);
-			IupSetAttribute(device_list, att_name, Pm_GetDeviceInfo(outs[j])->name);
+			IupSetAttribute(device_list, att_name, Pm_GetDeviceInfo(game.outs[j])->name); // return values of GetDeviceInfo persist until Pm_Terminate()
 			free(att_name);
+			if (out == game.outs[j]) IupSetInt(device_list, "VALUE", j+1); // set the dropdown to currently selected output
 		}
 	}
 	IupSetAttribute(device_list, "DROPDOWN", "YES");
-	IupSetInt(device_list, "VALUE", out+1);
-	open_audio_callback(NULL); // everything is set up => try to open out device
+	Ihandle * open_audio_button = IupSetCallbacks(
+		IupSetAtt(
+			NULL,IupButton("Open",NULL),
+			"device_list",device_list,
+			NULL
+		),
+		"ACTION",(Icallback)open_audio_callback,
+		NULL
+	);
 
-	program_number = IupSetAttributes(IupText(NULL),"VALUE=0,SPIN=YES,SPINMIN=0,SPINMAX=255,SPININC=1");
+	Ihandle * program_number = IupSetAttributes(IupText(NULL),"VALUE=0,SPIN=YES,SPINMIN=0,SPINMAX=255,SPININC=1");
 	IupSetAttribute(program_number, "MASK", IUP_MASK_INT);
+	Ihandle * program_number_button = IupSetCallbacks(
+		IupSetAtt(
+			NULL,IupButton("Set program",NULL),
+			"program_number",program_number,
+			NULL
+		),
+		"ACTION",(Icallback)set_program_callback,
+		NULL
+	);
 
-	key_text = IupLabel("___-____");
-	IupSetInt(key_text,"FONTSIZE",IupGetInt(key_text,"FONTSIZE")*2);
-	chord_text = IupLabel("__");
-	IupSetInt(chord_text,"FONTSIZE",IupGetInt(chord_text,"FONTSIZE")*4);
+	game.key_text = IupLabel("___-____");
+	IupSetInt(game.key_text,"FONTSIZE",IupGetInt(game.key_text,"FONTSIZE")*2);
+	game.chord_text = IupLabel("__");
+	IupSetInt(game.chord_text,"FONTSIZE",IupGetInt(game.chord_text,"FONTSIZE")*4);
 
-	srand((unsigned int)time(NULL));
-	change_key();
-
-	single_note_checkbox = IupSetAttributes(IupToggle("Single notes",NULL),"VALUE=ON");
+	game.single_note_checkbox = IupSetAttributes(IupToggle("Single notes",NULL),"VALUE=ON");
 
 	IupSetHandle("Tonic_icon",IupImageRGBA(64,64,tonic_64x64_rgba));
 
@@ -127,25 +151,31 @@ int main(int argc, char** argv) {
 #define IupAlignCenter(x) IupSetAttributes((x),"ALIGNMENT=ACENTER:ACENTER")
 	IupShow(IupSetAttributes(
 		IupSetCallbacks(IupDialog(IupVbox(
-			IupHbox(IupHorizExpand(device_list),IupSetCallbacks(IupButton("Open",NULL),"ACTION",(Icallback)open_audio_callback,NULL),NULL),
+			IupHbox(IupHorizExpand(device_list),open_audio_button,NULL),
 			IupHbox(
 				IupHorizExpand(program_number),
-				IupSetCallbacks(IupButton("Set program",NULL),"ACTION",(Icallback)set_program_callback,NULL),
+				program_number_button,
 			NULL),
-			single_note_checkbox,
-			IupHorizExpand(IupAlignCenter(key_text)), IupHorizExpand(IupAlignCenter(chord_text)),
+			game.single_note_checkbox,
+			IupHorizExpand(IupAlignCenter(game.key_text)), IupHorizExpand(IupAlignCenter(game.chord_text)),
 			IupHorizExpand(IupAlignCenter(IupLabel("guess: ctrl+1..7\nplay chord again: =\nplay tonic again: t\nnew key: -"))),
 		NULL)),"K_ANY",(Icallback)keypress_callback,NULL),
 	"TITLE=\"Tonic\",RESIZE=NO,ICON=\"Tonic_icon\""));
 
+	// everything is set up => try to open out device
+	open_audio_callback(open_audio_button);
+	// set the key, too
+	srand((unsigned int)time(NULL));
+	change_key(&game);
+
 	IupMainLoop();
 
-	Pm_Close(midi);
-	Pm_Terminate();
+	Pm_Close(game.midi);
 
+	// IUP has stored some pointers owned by PortMidi => shut down the former first
 	IupClose();
-
-	free(outs);
+	Pm_Terminate();
+	free(game.outs);
 	return 0;
 }
 

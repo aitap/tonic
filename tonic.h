@@ -10,17 +10,18 @@
 #include <time.h>
 #include <stdbool.h>
 
-// globals
-//  midi out-related variables
-extern PmStream* midi; // current output
-extern PmDeviceID* outs; // array of output indices
+struct game {
+// MIDI handles
+	PmStream* midi; // current output
+	PmDeviceID* outs; // array of output devices
 //  interface handles
-extern Ihandle *key_text, *chord_text; // current key and previous answer
-extern Ihandle *single_note_checkbox; // play single notes instead of triads
+	Ihandle *key_text, *chord_text; /* show current key and whether the guess was correct */
+	Ihandle* single_note_checkbox; /* play single notes, not triads */
 //  game variables
-extern int current_key;
-extern int current_note;
-extern bool current_minor;
+	int current_key;
+	int current_note;
+	bool current_minor;
+};
 
 // exported functions
 //  main.c
@@ -28,7 +29,7 @@ PmTimestamp my_timer(void*); // timer to plan chords in sound_chord
 PmError show_if_pm_error(PmError); // signal if an error occurs
 //  game.c
 int keypress_callback(Ihandle*, int); // handle key presses
-void change_key(void); // generate a new key
+void change_key(struct game*); // generate a new key
 
 // tables of constants
 typedef struct {
