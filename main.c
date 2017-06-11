@@ -3,9 +3,9 @@
 extern unsigned char tonic_64x64_rgba[];
 
 static const int32_t latency = 16; /* I need timestamps, and 16ms seems reasonable */
-static const size_t err_msg_len = 1024;
 
 PmError show_if_pm_error(PmError code) {
+	static const size_t err_msg_len = 1024;
 	char os_error[err_msg_len];
 	if (code == pmNoError) return code;
 	if (code == pmHostError)

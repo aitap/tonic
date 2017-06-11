@@ -10,8 +10,8 @@ static int uniform_random(int min, int max) {
 	 * + min => [min,max]
 	 */
 	return min + (int)(
-		rand() * (double)(max-min+1)
-		/(RAND_MAX + 1.0)
+		rand() * (max-min+1.)
+		/(RAND_MAX + 1.)
 	);
 }
 
@@ -40,7 +40,6 @@ static void sound_chord(struct game * game, int note, bool single_note) {
 }
 
 static void check_guess(struct game * game, int pressed) {
-	Ihandle *chord_text = IupGetHandle("chord_text");
 	int guess = 0;
 	switch (pressed) {
 		case iup_XkeyCtrl(K_1): guess = 1; break;
@@ -54,6 +53,7 @@ static void check_guess(struct game * game, int pressed) {
 
 	if (!guess) return;
 	
+	Ihandle *chord_text = IupGetHandle("chord_text");
 	if (guess-1 == game->note)
 		IupSetAttribute(chord_text, "FGCOLOR", "#00AA00");
 	else 
