@@ -20,7 +20,7 @@ PmTimestamp my_timer (void* unused) {
 }
 
 static int open_audio_callback(Ihandle* button) {
-	struct game * game = (struct game*)IupGetGlobal("struct_game");
+	struct game * game = (struct game*)IupGetAttribute(button,"struct_game");
 
 	if (
 		game->midi &&
@@ -49,7 +49,7 @@ static int open_audio_callback(Ihandle* button) {
 static int set_program_callback(Ihandle* button) {
 	show_if_pm_error(
 		Pm_WriteShort(
-			((struct game*)IupGetGlobal("struct_game"))->midi,
+			((struct game*)IupGetAttribute(button,"struct_game"))->midi,
 			0,
 			Pm_Message(
 				0xC0,
@@ -87,7 +87,6 @@ int main(int argc, char** argv) {
 	/* at this point we should have at least one output device */
 
 	struct game game = {};
-	IupSetGlobal("struct_game",(void*)&game);
 
 	Ihandle * device_list = IupList(NULL); /* ask the user which output device they want */
 
@@ -145,23 +144,35 @@ int main(int argc, char** argv) {
 	IupSetHandle("chord_text",chord_text);
 	IupSetInt(chord_text,"FONTSIZE",IupGetInt(chord_text,"FONTSIZE")*4);
 
-	IupSetHandle("Tonic_icon",IupImageRGBA(64,64,tonic_64x64_rgba));
-
 #define IupHorizExpand(x) IupSetAttributes((x),"EXPAND=HORIZONTAL")
 #define IupAlignCenter(x) IupSetAttributes((x),"ALIGNMENT=ACENTER:ACENTER")
-	IupShow(IupSetAttributes(
-		IupSetCallbacks(IupDialog(IupVbox(
-			IupHbox(IupHorizExpand(device_list),open_audio_button,NULL),
-			IupHbox(
-				IupHorizExpand(program_number),
-				program_number_button,
-			NULL),
-			/* this should have been included in struct game, but storing state in the Ihandle yields more compact code - maybe refactor later */
-			IupSetAtt("single_note_checkbox",IupToggle("&Single notes",NULL),"VALUE","ON",NULL),
-			IupHorizExpand(IupAlignCenter(key_text)), IupHorizExpand(IupAlignCenter(chord_text)),
-			IupHorizExpand(IupAlignCenter(IupLabel("guess: ctrl+1..7\nplay chord again: =\nplay tonic again: t\nnew key: -"))),
-		NULL)),"K_ANY",(Icallback)keypress_callback,NULL),
-	"TITLE=\"Tonic\",RESIZE=NO,ICON=\"Tonic_icon\""));
+	IupShow(
+		IupSetAtt(
+			NULL,
+			IupSetCallbacks(
+				IupDialog(
+					IupVbox(
+						IupHbox(IupHorizExpand(device_list),open_audio_button,NULL),
+						IupHbox(
+							IupHorizExpand(program_number),
+							program_number_button,
+						NULL),
+						/* this should have been included in struct game, but storing state in the Ihandle yields more compact code - maybe refactor later */
+						IupSetAtt("single_note_checkbox",IupToggle("&Single notes",NULL),"VALUE","ON",NULL),
+						IupHorizExpand(IupAlignCenter(key_text)), IupHorizExpand(IupAlignCenter(chord_text)),
+						IupHorizExpand(IupAlignCenter(IupLabel("guess: ctrl+1..7\nplay chord again: =\nplay tonic again: t\nnew key: -"))),
+						NULL
+					)
+				),
+				"K_ANY",(Icallback)keypress_callback,
+				NULL
+			),
+			"TITLE","Tonic","RESIZE","NO",
+			"ICON",IupImageRGBA(64,64,tonic_64x64_rgba),
+			"struct_game",(void*)&game,
+			NULL
+		)
+	);
 
 	// everything is set up => try to open out device
 	open_audio_callback(open_audio_button);

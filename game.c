@@ -46,8 +46,7 @@ static bool current_single_note() {
 	);
 }
 
-static void check_guess(int pressed) {
-	struct game * game = (struct game*)IupGetGlobal("struct_game");
+static void check_guess(struct game * game, int pressed) {
 	Ihandle *chord_text = IupGetHandle("chord_text");
 	int guess = 0;
 	switch (pressed) {
@@ -89,12 +88,12 @@ void change_key(struct game* game) {
 }
 
 int keypress_callback(Ihandle* dialog, int pressed) {
-	struct game * game = (struct game*)IupGetGlobal("struct_game");
-	if (iup_isCtrlXkey(pressed)) { check_guess(pressed); }
+	struct game * game = (struct game*)IupGetAttribute(dialog,"struct_game");
+	if (iup_isCtrlXkey(pressed)) { check_guess(game,pressed); }
 	else {
 		switch (pressed) {
 			case K_minus:
-				change_key((struct game*)IupGetGlobal("struct_game"));
+				change_key(game);
 				break;
 			case K_equal:
 				sound_chord(game, game->note, current_single_note());
