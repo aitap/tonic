@@ -26,9 +26,10 @@ struct game {
 PmTimestamp my_timer(void*); // timer to plan chords in sound_chord
 PmError show_if_pm_error(PmError); // signal if an error occurs
 //  game.c
-int keypress_callback(Ihandle*, int); // handle key presses
 void change_key(struct game*); // generate a new key
 void check_guess(struct game *, int); // check user's guess
+void sound_chord(struct game *, int, bool); // sound chord/note from current key
+void change_key(struct game*); // change current key
 
 // tables of constants
 typedef struct {

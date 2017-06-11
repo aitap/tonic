@@ -74,6 +74,59 @@ static int answer_button_callback(Ihandle* button) {
 	return IUP_DEFAULT;
 }
 
+static int again_button_callback(Ihandle* button) {
+	struct game * game = (struct game*)IupGetAttribute(button,"struct_game");
+	sound_chord(game, game->note, game->single);
+	return IUP_DEFAULT;
+}
+
+static int tonic_button_callback(Ihandle* button) {
+	struct game * game = (struct game*)IupGetAttribute(button,"struct_game");
+	sound_chord(game, 0, false);
+	return IUP_DEFAULT;
+}
+
+static int key_button_callback(Ihandle* button) {
+	struct game * game = (struct game*)IupGetAttribute(button,"struct_game");
+	change_key(game);
+	return IUP_DEFAULT;
+}
+
+static int pressed_to_guess(int pressed) {
+	int guess = 0;
+	switch (pressed) {
+		case iup_XkeyCtrl(K_1): guess = 1; break;
+		case iup_XkeyCtrl(K_2): guess = 2; break;
+		case iup_XkeyCtrl(K_3): guess = 3; break;
+		case iup_XkeyCtrl(K_4): guess = 4; break;
+		case iup_XkeyCtrl(K_5): guess = 5; break;
+		case iup_XkeyCtrl(K_6): guess = 6; break;
+		case iup_XkeyCtrl(K_7): guess = 7; break;
+	}
+	return guess;
+}
+
+static int keypress_callback(Ihandle* dialog, int pressed) {
+	struct game * game = (struct game*)IupGetAttribute(dialog,"struct_game");
+	if (iup_isCtrlXkey(pressed)) {
+		int guess = pressed_to_guess(pressed);
+		if (guess) check_guess(game,guess);
+	} else {
+		switch (pressed) {
+			case K_minus:
+				change_key(game);
+				break;
+			case K_equal:
+				sound_chord(game, game->note, game->single);
+				break;
+			case K_t:
+				sound_chord(game, 0, false);
+				break;
+		}
+	}
+	return IUP_DEFAULT;
+}
+
 int main(int argc, char** argv) {
 	IupOpen(&argc, &argv);
 
@@ -193,6 +246,12 @@ int main(int argc, char** argv) {
 						),
 						IupHorizExpand(IupAlignCenter(key_text)), IupHorizExpand(IupAlignCenter(chord_text)),
 						answer_row,
+						IupHbox(
+							IupSetCallbacks(IupHorizExpand(IupButton("Again",NULL)),"ACTION",again_button_callback,NULL),
+							IupSetCallbacks(IupHorizExpand(IupButton("Tonic",NULL)),"ACTION",tonic_button_callback,NULL),
+							IupSetCallbacks(IupHorizExpand(IupButton("Change key",NULL)),"ACTION",key_button_callback,NULL),
+							NULL
+						),
 						IupHorizExpand(IupAlignCenter(IupLabel("guess: ctrl+1..7\nplay chord again: =\nplay tonic again: t\nnew key: -"))),
 						NULL
 					)

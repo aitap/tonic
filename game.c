@@ -15,7 +15,7 @@ static int uniform_random(int min, int max) {
 	);
 }
 
-static void sound_chord(struct game * game, int note, bool single_note) {
+void sound_chord(struct game * game, int note, bool single_note) {
 	PmTimestamp now = my_timer(NULL);
 	PmEvent chord[6];
 	// if checkbox is set, play single notes instead of triads
@@ -39,20 +39,6 @@ static void sound_chord(struct game * game, int note, bool single_note) {
 	show_if_pm_error(Pm_Write(game->midi, chord, max_note*2));
 }
 
-static int pressed_to_guess(int pressed) {
-	int guess = 0;
-	switch (pressed) {
-		case iup_XkeyCtrl(K_1): guess = 1; break;
-		case iup_XkeyCtrl(K_2): guess = 2; break;
-		case iup_XkeyCtrl(K_3): guess = 3; break;
-		case iup_XkeyCtrl(K_4): guess = 4; break;
-		case iup_XkeyCtrl(K_5): guess = 5; break;
-		case iup_XkeyCtrl(K_6): guess = 6; break;
-		case iup_XkeyCtrl(K_7): guess = 7; break;
-	}
-	return guess;
-}
-
 // note: guess should be int in [1..7]
 void check_guess(struct game * game, int guess) {
 	Ihandle *chord_text = IupGetHandle("chord_text");
@@ -61,7 +47,7 @@ void check_guess(struct game * game, int guess) {
 		Ihandle * button = IupGetHandle(steps[i]);
 		IupSetAttribute(button,"FGCOLOR",IupGetAttribute(button,"DLGFGCOLOR"));
 	}
-	if (guess-1 == game->note)
+	if (guess-1 == game->note) // right
 		IupSetAttribute(chord_text, "FGCOLOR", "#00AA00");
 	else {
 		IupSetAttribute(chord_text, "FGCOLOR", "#AA0000");
@@ -69,6 +55,7 @@ void check_guess(struct game * game, int guess) {
 	}
 	IupSetAttribute(IupGetHandle(steps[game->note]),"FGCOLOR","#00AA00");
 
+	// show the right answer and update
 	IupSetAttribute(chord_text, "TITLE", steps[game->note]);
 	game->note = uniform_random(0,steps_size-1);
 	sound_chord(game, game->note, game->single);
@@ -88,25 +75,4 @@ void change_key(struct game* game) {
 	IupSetAttribute(chord_text,"TITLE",steps[0]);
 	IupSetAttribute(chord_text,"FGCOLOR","#000000");
 	sound_chord(game, game->note, false);
-}
-
-int keypress_callback(Ihandle* dialog, int pressed) {
-	struct game * game = (struct game*)IupGetAttribute(dialog,"struct_game");
-	if (iup_isCtrlXkey(pressed)) {
-		int guess = pressed_to_guess(pressed);
-		if (guess) check_guess(game,guess);
-	} else {
-		switch (pressed) {
-			case K_minus:
-				change_key(game);
-				break;
-			case K_equal:
-				sound_chord(game, game->note, game->single);
-				break;
-			case K_t:
-				sound_chord(game, 0, false);
-				break;
-		}
-	}
-	return IUP_DEFAULT;
 }
