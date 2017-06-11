@@ -18,6 +18,7 @@ struct game {
 	int key;
 	int note;
 	bool minor;
+	bool single;
 };
 
 // exported functions

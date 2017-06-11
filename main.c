@@ -59,7 +59,13 @@ static int set_program_callback(Ihandle* button) {
 		)
 	);
 	return IUP_DEFAULT;
-}	
+}
+
+static int set_single_notes(Ihandle* checkbox, int set) {
+	struct game * game = (struct game*)IupGetAttribute(checkbox,"struct_game");
+	game->single = (bool)IupGetInt(checkbox,"VALUE");
+	return IUP_DEFAULT;
+}
 
 int main(int argc, char** argv) {
 	IupOpen(&argc, &argv);
@@ -86,7 +92,11 @@ int main(int argc, char** argv) {
 	}
 	/* at this point we should have at least one output device */
 
-	struct game game = {};
+	struct game game = {
+		.midi=NULL, .outs=NULL, // to be filled later
+		.key=0, .note=0, .minor=false, // safe defaults
+		.single=true // this *is* default
+	};
 
 	Ihandle * device_list = IupList(NULL); /* ask the user which output device they want */
 
@@ -157,8 +167,11 @@ int main(int argc, char** argv) {
 							IupHorizExpand(program_number),
 							program_number_button,
 						NULL),
-						/* this should have been included in struct game, but storing state in the Ihandle yields more compact code - maybe refactor later */
-						IupSetAtt("single_note_checkbox",IupToggle("&Single notes",NULL),"VALUE","ON",NULL),
+						IupSetCallbacks(
+							IupSetAttributes(IupToggle("&Single notes",NULL),"VALUE=ON"), // reflect the default in struct game
+							"ACTION",(Icallback)set_single_notes,
+							NULL
+						),
 						IupHorizExpand(IupAlignCenter(key_text)), IupHorizExpand(IupAlignCenter(chord_text)),
 						IupHorizExpand(IupAlignCenter(IupLabel("guess: ctrl+1..7\nplay chord again: =\nplay tonic again: t\nnew key: -"))),
 						NULL

@@ -39,13 +39,6 @@ static void sound_chord(struct game * game, int note, bool single_note) {
 	show_if_pm_error(Pm_Write(game->midi, chord, max_note*2));
 }
 
-static bool current_single_note() {
-	return (bool)IupGetInt(
-		IupGetHandle("single_note_checkbox"),
-		"VALUE"
-	);
-}
-
 static void check_guess(struct game * game, int pressed) {
 	Ihandle *chord_text = IupGetHandle("chord_text");
 	int guess = 0;
@@ -68,7 +61,7 @@ static void check_guess(struct game * game, int pressed) {
 
 	IupSetAttribute(chord_text, "TITLE", steps[game->note]);
 	game->note = uniform_random(0,steps_size-1);
-	sound_chord(game, game->note, current_single_note());
+	sound_chord(game, game->note, game->single);
 }
 
 void change_key(struct game* game) {
@@ -96,7 +89,7 @@ int keypress_callback(Ihandle* dialog, int pressed) {
 				change_key(game);
 				break;
 			case K_equal:
-				sound_chord(game, game->note, current_single_note());
+				sound_chord(game, game->note, game->single);
 				break;
 			case K_t:
 				sound_chord(game, 0, false);
