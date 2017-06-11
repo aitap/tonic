@@ -41,14 +41,14 @@ void sound_chord(int key, int note, bool minor, bool single_note) {
 
 bool current_single_note() {
 	return (bool)IupGetInt(
-		((struct game*)IupGetGlobal("struct_game"))->single_note_checkbox,
+		IupGetHandle("single_note_checkbox"),
 		"VALUE"
 	);
 }
 
 void check_guess(int pressed) {
 	struct game * game = (struct game*)IupGetGlobal("struct_game");
-	Ihandle *chord_text=game->chord_text;
+	Ihandle *chord_text = IupGetHandle("chord_text");
 	int guess = 0;
 	switch (pressed) {
 		case iup_XkeyCtrl(K_1): guess = 1; break;
@@ -73,17 +73,18 @@ void check_guess(int pressed) {
 }
 
 void change_key(struct game* game) {
+	Ihandle *key_text=IupGetHandle("key_text"), *chord_text=IupGetHandle("chord_text");
 	game->current_key = uniform_random(0,keys_size-1);
 	game->current_minor = uniform_random(0,1);
 	game->current_note = 0;
-	IupSetAttribute(game->key_text,
+	IupSetAttribute(key_text,
 		"TITLE",
 		game->current_minor ?
 			keys[game->current_key].minor_name :
 			keys[game->current_key].major_name
 	);
-	IupSetAttribute(game->chord_text,"TITLE",steps[0]);
-	IupSetAttribute(game->chord_text,"FGCOLOR","#000000");
+	IupSetAttribute(chord_text,"TITLE",steps[0]);
+	IupSetAttribute(chord_text,"FGCOLOR","#000000");
 	sound_chord(game->current_key, game->current_note, game->current_minor, false);
 }
 

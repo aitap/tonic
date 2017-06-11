@@ -14,9 +14,6 @@ struct game {
 // MIDI handles
 	PmStream* midi; // current output
 	PmDeviceID* outs; // array of output devices
-//  interface handles
-	Ihandle *key_text, *chord_text; /* show current key and whether the guess was correct */
-	Ihandle* single_note_checkbox; /* play single notes, not triads */
 //  game variables
 	int current_key;
 	int current_note;

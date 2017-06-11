@@ -6,7 +6,7 @@ static const int32_t latency = 16; /* I need timestamps, and 16ms seems reasonab
 static const size_t err_msg_len = 1024;
 
 PmError show_if_pm_error(PmError code) {
-	char os_error[err_msg_len]; // will it blow up?
+	char os_error[err_msg_len];
 	if (code == pmNoError) return code;
 	if (code == pmHostError)
 		Pm_GetHostErrorText(os_error, err_msg_len);
@@ -138,12 +138,12 @@ int main(int argc, char** argv) {
 		NULL
 	);
 
-	game.key_text = IupLabel("___-____");
-	IupSetInt(game.key_text,"FONTSIZE",IupGetInt(game.key_text,"FONTSIZE")*2);
-	game.chord_text = IupLabel("__");
-	IupSetInt(game.chord_text,"FONTSIZE",IupGetInt(game.chord_text,"FONTSIZE")*4);
-
-	game.single_note_checkbox = IupSetAttributes(IupToggle("Single notes",NULL),"VALUE=ON");
+	Ihandle * key_text = IupLabel("___-____");
+	IupSetHandle("key_text",key_text);
+	IupSetInt(key_text,"FONTSIZE",IupGetInt(key_text,"FONTSIZE")*2);
+	Ihandle * chord_text = IupLabel("__");
+	IupSetHandle("chord_text",chord_text);
+	IupSetInt(chord_text,"FONTSIZE",IupGetInt(chord_text,"FONTSIZE")*4);
 
 	IupSetHandle("Tonic_icon",IupImageRGBA(64,64,tonic_64x64_rgba));
 
@@ -156,8 +156,9 @@ int main(int argc, char** argv) {
 				IupHorizExpand(program_number),
 				program_number_button,
 			NULL),
-			game.single_note_checkbox,
-			IupHorizExpand(IupAlignCenter(game.key_text)), IupHorizExpand(IupAlignCenter(game.chord_text)),
+			/* this should have been included in struct game, but storing state in the Ihandle yields more compact code - maybe refactor later */
+			IupSetAtt("single_note_checkbox",IupToggle("&Single notes",NULL),"VALUE","ON",NULL),
+			IupHorizExpand(IupAlignCenter(key_text)), IupHorizExpand(IupAlignCenter(chord_text)),
 			IupHorizExpand(IupAlignCenter(IupLabel("guess: ctrl+1..7\nplay chord again: =\nplay tonic again: t\nnew key: -"))),
 		NULL)),"K_ANY",(Icallback)keypress_callback,NULL),
 	"TITLE=\"Tonic\",RESIZE=NO,ICON=\"Tonic_icon\""));
