@@ -28,6 +28,7 @@ PmError show_if_pm_error(PmError); // signal if an error occurs
 //  game.c
 int keypress_callback(Ihandle*, int); // handle key presses
 void change_key(struct game*); // generate a new key
+void check_guess(struct game *, int); // check user's guess
 
 // tables of constants
 typedef struct {

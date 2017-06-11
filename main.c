@@ -67,6 +67,13 @@ static int set_single_notes(Ihandle* checkbox, int set) {
 	return IUP_DEFAULT;
 }
 
+static int answer_button_callback(Ihandle* button) {
+	struct game * game = (struct game*)IupGetAttribute(button,"struct_game");
+	int answer = IupGetInt(button,"answer");
+	check_guess(game,answer);
+	return IUP_DEFAULT;
+}
+
 int main(int argc, char** argv) {
 	IupOpen(&argc, &argv);
 
@@ -154,6 +161,18 @@ int main(int argc, char** argv) {
 	IupSetHandle("chord_text",chord_text);
 	IupSetInt(chord_text,"FONTSIZE",IupGetInt(chord_text,"FONTSIZE")*4);
 
+	Ihandle * answer_row = IupHbox(NULL);
+	for (size_t i = 0; i < steps_size; i++) {
+		Ihandle * button = IupSetAtt(
+			steps[i],IupButton(steps[i],NULL), // we'll use the names to color the buttons
+			"EXPAND","HORIZONTAL","ALIGNMENT","ACENTER:ACENTER",
+			NULL
+		);
+		IupSetInt(button,"answer",(int)i+1);
+		IupSetCallback(button,"ACTION",answer_button_callback);
+		IupAppend(answer_row, button);
+	}
+
 #define IupHorizExpand(x) IupSetAttributes((x),"EXPAND=HORIZONTAL")
 #define IupAlignCenter(x) IupSetAttributes((x),"ALIGNMENT=ACENTER:ACENTER")
 	IupShow(
@@ -173,6 +192,7 @@ int main(int argc, char** argv) {
 							NULL
 						),
 						IupHorizExpand(IupAlignCenter(key_text)), IupHorizExpand(IupAlignCenter(chord_text)),
+						answer_row,
 						IupHorizExpand(IupAlignCenter(IupLabel("guess: ctrl+1..7\nplay chord again: =\nplay tonic again: t\nnew key: -"))),
 						NULL
 					)
