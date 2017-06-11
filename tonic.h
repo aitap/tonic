@@ -15,9 +15,9 @@ struct game {
 	PmStream* midi; // current output
 	PmDeviceID* outs; // array of output devices
 //  game variables
-	int current_key;
-	int current_note;
-	bool current_minor;
+	int key;
+	int note;
+	bool minor;
 };
 
 // exported functions
