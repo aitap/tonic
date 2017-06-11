@@ -115,10 +115,10 @@ int main(int argc, char** argv) {
 		/* at this point valid device IDs are in range 0..num_outs-1 */
 
 		for (size_t j = 0; j < num_outs; j++) {
-			size_t length = snprintf(NULL, 0, "%d", j)+1;
+			size_t length = snprintf(NULL, 0, "%d", (int)j)+1;
 			char* att_name = malloc(length);
 			assert(att_name); // failure to allocate 2..3 bytes should be fatal (does anyone have 1000 MIDI outputs?)
-			snprintf(att_name, length, "%d", j+1);
+			snprintf(att_name, length, "%d", (int)j+1);
 			IupSetAttribute(device_list, att_name, Pm_GetDeviceInfo(game.outs[j])->name); // return values of GetDeviceInfo persist until Pm_Terminate()
 			free(att_name);
 			if (out == game.outs[j]) IupSetInt(device_list, "VALUE", j+1); // set the dropdown to currently selected output
