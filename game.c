@@ -47,17 +47,26 @@ void check_guess(struct game * game, int guess) {
 		Ihandle * button = IupGetHandle(steps[i]);
 		IupSetAttribute(button,"FGCOLOR",IupGetAttribute(button,"DLGFGCOLOR"));
 	}
-	if (guess-1 == game->note) // right
+
+	// show the right answer
+	IupSetAttribute(chord_text, "TITLE", steps[game->note]);
+
+	// check and update
+	if (guess-1 == game->note) {
 		IupSetAttribute(chord_text, "FGCOLOR", "#00AA00");
-	else {
+		// update to a different note
+		int old = game->note;
+		do
+			game->note = uniform_random(0,steps_size-1);
+		while (old == game->note);
+	} else {
 		IupSetAttribute(chord_text, "FGCOLOR", "#AA0000");
 		IupSetAttribute(IupGetHandle(steps[guess-1]),"FGCOLOR","#AA0000");
+		IupSetAttribute(IupGetHandle(steps[game->note]),"FGCOLOR","#00AA00");
+		// don't update the challenge
 	}
-	IupSetAttribute(IupGetHandle(steps[game->note]),"FGCOLOR","#00AA00");
 
-	// show the right answer and update
-	IupSetAttribute(chord_text, "TITLE", steps[game->note]);
-	game->note = uniform_random(0,steps_size-1);
+	// play the next challenge
 	sound_chord(game, game->note, game->single);
 }
 
