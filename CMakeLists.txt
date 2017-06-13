@@ -28,16 +28,28 @@ set (TONIC_SOURCE main.c game.c keys.c logo/tonic_64x64_rgba.c)
 if(WIN32)
 	# support modern UI and high DPI
 	set(TONIC_SOURCE ${TONIC_SOURCE} iup.rc)
+	# static linkage of IUP on Windows requires specifying comctl32 manually
+	set(IUP_LIBRARIES iup comctl32)
+else()
+	set(IUP_LIBRARIES iup)
 endif()
 
-add_executable(tonic ${TONIC_SOURCE})
+add_executable(tonic WIN32 ${TONIC_SOURCE})
 if(WIN32)
 	# apparently, on Win32 portmidi consists of one DLL
-	set(PORTLIBRARIES portmidi)
+	# also, specify winmm dependency to allow static linking
+	set(PORTMIDI_LIBRARIES portmidi winmm)
 	# tonic.exe is a GUI app
 	set_target_properties(tonic PROPERTIES LINK_FLAGS -mwindows)
+	# statically link libgcc because it's a pain to package and redistribute
+	if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
+		set_target_properties(
+			tonic PROPERTIES
+			LINK_FLAGS -static-libgcc
+		)
+	endif()
 else()
-	set(PORTLIBRARIES portmidi porttime)
+	set(PORTMIDI_LIBRARIES portmidi porttime)
 endif()
 
-target_link_libraries(tonic iup ${PORTLIBRARIES})
+target_link_libraries(tonic ${IUP_LIBRARIES} ${PORTMIDI_LIBRARIES})
