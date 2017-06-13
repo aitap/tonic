@@ -247,9 +247,9 @@ int main(int argc, char** argv) {
 						IupHorizExpand(IupAlignCenter(key_text)), IupHorizExpand(IupAlignCenter(chord_text)),
 						answer_row,
 						IupHbox(
-							IupSetCallbacks(IupHorizExpand(IupButton("Again",NULL)),"ACTION",again_button_callback,NULL),
-							IupSetCallbacks(IupHorizExpand(IupButton("Tonic",NULL)),"ACTION",tonic_button_callback,NULL),
-							IupSetCallbacks(IupHorizExpand(IupButton("Change key",NULL)),"ACTION",key_button_callback,NULL),
+							IupSetCallbacks(IupHorizExpand(IupButton("&Again",NULL)),"ACTION",again_button_callback,NULL),
+							IupSetCallbacks(IupHorizExpand(IupButton("&Tonic",NULL)),"ACTION",tonic_button_callback,NULL),
+							IupSetCallbacks(IupHorizExpand(IupButton("&Change key",NULL)),"ACTION",key_button_callback,NULL),
 							NULL
 						),
 						IupHorizExpand(IupAlignCenter(IupLabel("guess: ctrl+1..7\nplay chord again: =\nplay tonic again: t\nnew key: -"))),
